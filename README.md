@@ -41,6 +41,8 @@ See individual README files in each directory for setup and development instruct
 - Safari browser (macOS)
 - Node.js (for development tooling)
 - Google Cloud Project with Gemini API access
+- NextJS
+- MongoDB
 
 ## Development
 
