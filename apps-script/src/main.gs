@@ -4,10 +4,39 @@
  * @return {void}
  */
 function initializeSystem() {
-  // TODO: Create hierarchical label structure
-  // TODO: Set up scheduled triggers for batch processing
-  // TODO: Initialize Properties service if needed
-  console.log("System initialization started");
+  try {
+    console.log("System initialization started");
+    
+    // Define labels to create
+    const labelsToCreate = [
+      LABEL_PREFIX,                // "AI"
+      CATEGORY_LABEL_PATH,         // "AI/Category"
+      URGENCY_LABEL_PATH,          // "AI/Urgency"
+      PROCESSED_LABEL              // "AI/Processed"
+    ];
+    
+    // Initialize each label
+    for (let i = 0; i < labelsToCreate.length; i++) {
+      const labelName = labelsToCreate[i];
+      
+      const existingLabel = GmailApp.getUserLabelByName(labelName);
+      
+      if (!existingLabel) {
+        // Label does not exist, create it
+        GmailApp.createLabel(labelName);
+        console.log("Label created: " + labelName);
+      } else {
+        // Label already exists
+        console.log("Label already exists: " + labelName);
+      }
+    }
+    
+    console.log("Gmail label initialization completed successfully");
+    
+    // TODO: Set up scheduled triggers for batch processing
+  } catch (error) {
+    console.error("Error during system initialization: " + error.toString());
+  }
 }
 
 /**
@@ -63,10 +92,35 @@ function saveLastProcessedTimestamp(timestamp) {
  * @return {Array<GmailThread>} Array of email threads to be classified
  */
 function fetchInboxEmailsSince(timestamp) {
-  // TODO: Query Gmail inbox using timestamp filter
-  // TODO: Exclude already processed emails
-  // TODO: Handle pagination for large result sets
-  return [];
+  try {
+    let query = 'label:inbox -label:"AI/Processed"';
+    
+    if (timestamp) {
+      // Convert ISO 8601 timestamp to Gmail search format (YYYY/MM/DD)
+      const date = new Date(timestamp);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const formattedDate = year + "/" + month + "/" + day;
+      
+      query += ' after:' + formattedDate;
+    } else {
+      // Default to retrieving emails from the last 1 day
+      query += ' newer_than:1d';
+    }
+    
+    console.log("Fetching emails with query: " + query);
+    
+    // Search with limit of 100 results per batch
+    const threads = GmailApp.search(query, 0, 100);
+    
+    console.log("Retrieved " + threads.length + " email threads");
+    
+    return threads;
+  } catch (error) {
+    console.error("Error fetching inbox emails: " + error.toString());
+    return [];
+  }
 }
 
 /**
