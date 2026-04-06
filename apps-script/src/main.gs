@@ -7,7 +7,7 @@ function initializeSystem() {
   try {
     console.log("System initialization started");
     
-    // Define labels to create
+    // Define labels to create based on urgency 
     const labelsToCreate = [
       LABEL_PREFIX,                // "AI"
       CATEGORY_LABEL_PATH,         // "AI/Category"
