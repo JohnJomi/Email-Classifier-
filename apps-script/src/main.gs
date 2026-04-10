@@ -95,7 +95,7 @@ function fetchInboxEmailsSince(timestamp) {
   try {
     let query = 'label:inbox -label:"AI/Processed"';
     
-    if (timestamp) {
+    if (timestamp != null) {
       // Convert ISO 8601 timestamp to Gmail search format (YYYY/MM/DD)
       const date = new Date(timestamp);
       const year = date.getFullYear();
@@ -130,12 +130,50 @@ function fetchInboxEmailsSince(timestamp) {
  * @return {Object} Batch payload object ready for Gemini API
  */
 function buildBatchPayload(emailThreads) {
-  // TODO: Extract email content and metadata
-  // TODO: Format according to Gemini Batch API specifications
-  // TODO: Include email IDs for result mapping
-  return {
-    requests: []
-  };
+  try {
+    const payload = {
+      requests: []
+    };
+    
+    // Return early if no threads to process
+    if (!emailThreads || emailThreads.length === 0) {
+      console.log("No email threads to process");
+      return payload;
+    }
+    
+    console.log("Processing " + emailThreads.length + " threads for batch payload");
+    
+    // Extract data from each thread
+    for (let i = 0; i < emailThreads.length; i++) {
+      const thread = emailThreads[i];
+      const messages = thread.getMessages();
+      
+      if (messages.length === 0) {
+        console.warn("Thread has no messages, skipping");
+        continue;
+      }
+      
+      const firstMessage = messages[0];
+      
+      const threadData = {
+        threadId: thread.getId(),
+        subject: firstMessage.getSubject(),
+        sender: firstMessage.getFrom(),
+        snippet: (firstMessage.getPlainBody() || "").substring(0, 500)
+      };
+      
+      payload.requests.push(threadData);
+    }
+    
+    console.log("Batch payload created with " + payload.requests.length + " entries");
+    
+    return payload;
+  } catch (error) {
+    console.error("Error building batch payload: " + error.toString());
+    return {
+      requests: []
+    };
+  }
 }
 
 /**
