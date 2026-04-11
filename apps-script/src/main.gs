@@ -1,6 +1,6 @@
 /**
  * Initializes the email classification system
- * Sets up necessary labels, properties, and triggers
+ * Sets up necessary labels, properties, and trigger
  * @return {void}
  */
 function initializeSystem() {
